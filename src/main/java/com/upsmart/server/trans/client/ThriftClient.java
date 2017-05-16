@@ -11,9 +11,7 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
 
-import com.upsmart.server.trans.client.recvdata.RecvStatus;
-import com.upsmart.server.trans.transinterface.BinaryData;
-import com.upsmart.server.trans.transinterface.ClientInfo;
+import com.upsmart.server.trans.enums.RecvStatus;
 import com.upsmart.server.trans.transinterface.ITransfer;
 
 /**
@@ -101,51 +99,33 @@ public class ThriftClient implements ClientProxy {
 		return false;
 	}
 
-	/**
-	 * query data from remote service
-	 */
 	@Override
-	public RecvData query(String cmd, long ver, byte[] bytes) throws Exception {
-		if (StringUtil.isNullOrEmpty(cmd)) {
-			throw new RuntimeException("The command of query is empty!");
-		}
+	public RecvData query(String cmd, TransferInfo trans) {
 
 		RecvData ret = new RecvData();
+		ret.status = RecvStatus.UNKNOWN;
+
+		if (StringUtil.isNullOrEmpty(cmd) || null == trans) {
+			ret.status = RecvStatus.PARAMS_INVALID;
+			return ret;
+		}
 
 		if (null != tTransferClient) {
-			BinaryData binaryData = new BinaryData();
-			//binaryData.setVersion(0);
-			//binaryData.setType(0);
-			//binaryData.setLength(0);
-			//binaryData.setCheckalgorithm("");
-			//binaryData.setCheckcodes(null);
-			binaryData.setData(bytes);
-
-			ClientInfo clientInfo = new ClientInfo();
-			//clientInfo.setVersion(0);
-			clientInfo.setUsername(thriftArgs.getName());
-			//clientInfo.setPassword("");
-			//clientInfo.setIp("");
-			//clientInfo.setPort("");
-			//clientInfo.setTime("");
-
-			TransferInfo transferInfo = new TransferInfo();
-			transferInfo.setVersion(ver);
-			//transferInfo.setType(0);
-			//transferInfo.setStatus(0);
-			transferInfo.setData(binaryData);
-			transferInfo.setClientinfo(clientInfo);
-
 			try {
-				TransferInfo response = tTransferClient.query(cmd, transferInfo);
-				ret.data = response.getData().getData();
+				TransferInfo response = tTransferClient.query(cmd, trans);
+				if(null != response){
+					ret.data = response;
+					ret.status = RecvStatus.SUCCESS;
+				}
+				else{
+					ret.status = RecvStatus.NO_DATA;
+				}
 
-				ret.status = RecvStatus.SUCCESS.getValue();
 			} catch (TException ex) {
-				ret.status = RecvStatus.CONNECTION_EXCEPTION.getValue();
+				ret.status = RecvStatus.CONNECTION_EXCEPTION;
 			}
 		} else {
-			ret.status = RecvStatus.CONNECTION_CLOSED.getValue();
+			ret.status = RecvStatus.CONNECTION_CLOSED;
 		}
 		return ret;
 	}

@@ -1,5 +1,6 @@
 package com.upsmart.server.trans.server;
 
+import com.upsmart.server.trans.server.contract.Contract;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.server.TThreadPoolServer.Args;
@@ -9,7 +10,6 @@ import org.apache.thrift.transport.TTransportException;
 
 import com.upsmart.server.trans.server.args.ServConnectionArgs;
 import com.upsmart.server.trans.server.args.ThriftServConnectionArgs;
-import com.upsmart.server.trans.server.contract.ThriftContract;
 import com.upsmart.server.trans.transinterface.ITransfer;
 
 /**
@@ -39,7 +39,7 @@ public class ThriftService implements ServerService
 		ThriftServConnectionArgs thriftServConnectionArgs = (ThriftServConnectionArgs)args;
 		
 		// create a new contract of thrift
-		ThriftContract contract = new ThriftContract(thriftServConnectionArgs.getContract());
+		Contract contract = thriftServConnectionArgs.getContract();
 		
 		// 设置服务及端口
 		TServerTransport serverTransport = new TServerSocket(thriftServConnectionArgs.getPort());

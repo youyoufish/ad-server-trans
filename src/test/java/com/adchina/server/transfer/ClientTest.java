@@ -6,16 +6,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
+import com.upsmart.server.common.utils.DateUtil;
 import com.upsmart.server.common.utils.StringUtil;
 import com.upsmart.server.trans.client.ClientProxy;
 import com.upsmart.server.trans.client.ThriftClient;
 import com.upsmart.server.trans.client.args.ThriftCliConnectionArgs;
 import com.upsmart.server.trans.client.recvdata.RecvData;
 
+import com.upsmart.server.trans.enums.RecvStatus;
+import com.upsmart.server.trans.transinterface.BinaryData;
+import com.upsmart.server.trans.transinterface.ClientInfo;
+import com.upsmart.server.trans.transinterface.TransferInfo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -116,8 +122,7 @@ public class ClientTest
 				ThriftCliConnectionArgs thriftArgs = new ThriftCliConnectionArgs(
 						"192.168.24.126",
 						8088,
-						0,
-						"local-ClientTest");
+						0);
 				
 				for (int i = 0; i < randomBytes.size(); ++i)
 				{
@@ -129,10 +134,21 @@ public class ClientTest
 					proxy.ping();
 					System.out.println(String.format("%d thread,%d bytes to be sended.", 
 							Thread .currentThread().getId(), bytes.length));
-					
-					RecvData recvData = proxy.query("return_data",0, bytes);
 
-					Assert.assertTrue(Arrays.equals(recvData.data, bytes));
+					ClientInfo ci = new ClientInfo();
+					ci.setTime(DateUtil.format(new Date(), "yyyyMMdd HHmmss"));
+
+					BinaryData bd = new BinaryData();
+					bd.setData(bytes);
+
+					TransferInfo ti = new TransferInfo();
+					ti.setVersion(1);
+					ti.setClientinfo(ci);
+					ti.setData(bd);
+
+					RecvData recvData = proxy.query("return_data", ti);
+
+					Assert.assertEquals(recvData.status, RecvStatus.SUCCESS);
 					proxy.close();
 				}
 

@@ -4,6 +4,8 @@ import java.io.Closeable;
 
 import com.upsmart.server.trans.client.args.CliConnectionArgs;
 import com.upsmart.server.trans.client.recvdata.RecvData;
+import com.upsmart.server.trans.transinterface.TransferInfo;
+import org.apache.thrift.TException;
 
 /**
  * client API
@@ -28,27 +30,8 @@ public interface ClientProxy extends Closeable
 	 * @return true or false
 	 */
 	boolean isOpen();
-	
-	/**
-	 * check the connection is active 
-	 * 
-	 * @return true or false
-	 * @throws Exception
-	 */
-	boolean ping() throws Exception;
-	
-	/**
-	 * query data from remote service
-	 * 
-	 * @param cmd
-	 * 			string for command  
-	 * @param ver
-	 * 			version for command
-	 * @param bytes
-	 * 			data transfered to remote service
-	 * @return 
-	 * 			data return from remote service
-	 * @throws Exception
-	 */
-	RecvData query(String cmd, long ver, byte[] bytes) throws Exception;
+
+	boolean ping() throws TException;
+
+	RecvData query(String cmd, TransferInfo trans) ;
 }

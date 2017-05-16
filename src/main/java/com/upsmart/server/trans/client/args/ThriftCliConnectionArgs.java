@@ -16,26 +16,22 @@ public class ThriftCliConnectionArgs implements CliConnectionArgs
 	private String 	address;
 	private int 	port;
 	private int 	connectionTimeout;
-	private String	name;
-	
+
 	/**
 	 * construction
 	 * 
 	 * @param _address
 	 * @param _port
 	 * @param _connectionTimeout
-	 * @param _name
 	 */
 	public ThriftCliConnectionArgs(
 			final String _address, 
 			final int _port,
-			final int _connectionTimeout,
-			final String _name)
+			final int _connectionTimeout)
 	{
 		this.address = _address;
 		this.port = _port;
 		this.connectionTimeout = _connectionTimeout;
-		this.name = _name;
 	}
 
 	/**
@@ -69,16 +65,6 @@ public class ThriftCliConnectionArgs implements CliConnectionArgs
 	public int getConnectionTimeout()
 	{
 		return connectionTimeout;
-	}
-
-	/**
-	 * client name
-	 * @return name
-	 */
-	@Override
-	public String getName()
-	{
-		return name;
 	}
 
 	/**

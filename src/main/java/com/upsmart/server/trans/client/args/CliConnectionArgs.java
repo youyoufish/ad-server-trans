@@ -14,30 +14,24 @@ public interface CliConnectionArgs
 	 * get remote service address
 	 * @return address
 	 */
-	public String getAddress();
+	String getAddress();
 	
 	/**
 	 * get remote service port
 	 * @return port
 	 */
-	public int getPort();
+	int getPort();
 	
 	/**
 	 * get connection timeout
 	 * @return milliseconds timeout
 	 */
-	public int getConnectionTimeout();
-	
-	/**
-	 * client name
-	 * @return name
-	 */
-	public String getName();
-	
+	int getConnectionTimeout();
+
 	/**
 	 * create client proxy by this args
-	 * @return client proxy 
+	 * @return client proxy
 	 * @throws Exception
 	 */
-	public ClientProxy createClientProxy() throws Exception;
+	ClientProxy createClientProxy() throws Exception;
 }

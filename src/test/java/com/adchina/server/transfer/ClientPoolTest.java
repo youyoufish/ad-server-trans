@@ -1,14 +1,19 @@
 package com.adchina.server.transfer;
 
+import java.util.Date;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
+import com.upsmart.server.common.utils.DateUtil;
 import com.upsmart.server.common.utils.StringUtil;
 import com.upsmart.server.trans.client.ClientProxy;
 import com.upsmart.server.trans.client.ClientProxyPool;
 import com.upsmart.server.trans.client.ThriftCLientPool;
 import com.upsmart.server.trans.client.args.ThriftCliConnectionArgs;
 import com.upsmart.server.trans.client.recvdata.RecvData;
+import com.upsmart.server.trans.transinterface.BinaryData;
+import com.upsmart.server.trans.transinterface.ClientInfo;
+import com.upsmart.server.trans.transinterface.TransferInfo;
 import org.junit.Test;
 
 public class ClientPoolTest
@@ -21,8 +26,7 @@ public class ClientPoolTest
 		ThriftCliConnectionArgs thriftArgs = new ThriftCliConnectionArgs(
 				"192.168.24.126",
 				8088,
-				0,
-				"local-ClientPoolTest");
+				0);
 		ClientProxyPool<ClientProxy> pool = new ThriftCLientPool(thriftArgs);
 
 		final int THREAD_COUNT = 10;
@@ -51,8 +55,15 @@ public class ClientPoolTest
 		ClientProxy proxy = pool.getResource();
 		if(proxy.isOpen())
 		{
-			RecvData t = proxy.query("get_ping_times", 0, null);
-			System.out.println(StringUtil.byteArrayToString(t.data));
+			ClientInfo ci = new ClientInfo();
+			ci.setTime(DateUtil.format(new Date(), "yyyyMMdd HHmmss"));
+
+			TransferInfo ti = new TransferInfo();
+			ti.setVersion(1);
+			ti.setClientinfo(ci);
+
+			RecvData t = proxy.query("get_ping_times",ti);
+			System.out.println(t.status.name());
 		}
 		else
 		{
