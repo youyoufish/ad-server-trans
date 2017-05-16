@@ -1,0 +1,119 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+buildDir = 'target'
+
+mainClassName = ""
+
+// gradle在编译时支持utf8编码
+[compileJava, javadoc, compileTestJava]*.options*.encoding = 'UTF-8'
+
+
+ext{
+    RELEASE_REPOSITORY = 'http://192.168.88.8:8081/nexus/content/repositories/releases'
+    SNAPSHOT_REPOSITORY = 'http://192.168.88.8:8081/nexus/content/repositories/snapshots'
+    GROUP_ID='com.upsmart'
+    ARTIFACT_ID='ad-server-trans'
+    SNAPSHOT_VERSION='0.1.0-SNAPSHOT'
+    RELEASE_VERSION='0.1.0'
+}
+
+def IS_RELEASE = System.getProperty("isrelease")  == "y" ? "$RELEASE_REPOSITORY" : "$SNAPSHOT_REPOSITORY"
+def JAR_VERSION = System.getProperty("isrelease") == "y" ? "$RELEASE_VERSION" : "$SNAPSHOT_VERSION"
+
+repositories {
+    mavenLocal()
+    maven { url "http://192.168.88.8:8081/nexus/content/groups/public" }
+    maven { url "$RELEASE_REPOSITORY" }
+    maven { url "$SNAPSHOT_REPOSITORY" }
+    mavenCentral()
+}
+
+// 项目依赖
+dependencies {
+
+    // runtime 配置项中包含的依赖在运行时是必须的
+    // testCompile 配置项中包含的依赖，在编译测试代码时是必须的
+    // testRuntime 配置项中包含的依赖，在运行测试代码时是必须的
+    // archives 配置项中包含项目生成的文件(如jar文件)
+    // default 配置相中包含运行时必须的依赖
+    // providedCompile 编译时不会用到，运行时会用到
+
+    testCompile(
+            [group: 'junit', name: 'junit', version: '4.11'],
+            [group: 'org.easymock', name: 'easymock',version: '3.2']
+    )
+
+    compile(
+	        [group: 'org.apache.thrift', name: 'libthrift', version: '0.10.0'],
+            [group: 'org.apache.commons', name: 'commons-pool2', version: '2.4.1'],
+            [group: 'com.upsmart', name: 'ad-server-common', version: '0.1.0-SNAPSHOT']
+    )
+
+    // 用于引用本地的jar包,如ojdbc6
+    compile fileTree(dir:'libs',include:['*.jar'])
+}
+
+// 去掉编译时的一些warning
+allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+    }
+}
+
+// 输入 gradle uploadArchives -Disrelease=y/n 打包上传至maven库
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.groupId = "$GROUP_ID"
+            pom.version = "$JAR_VERSION"
+            pom.artifactId = "$ARTIFACT_ID"
+            pom.project {
+
+                name project.name
+                packaging 'jar'
+                description 'infrastructure component'
+
+                licenses {
+                    license {
+                        name 'Unionpaysmart Licence'
+                        url 'http://www.unionpaysmart.com'
+                        distribution ''
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'yuhang'
+                        name 'yuhang'
+                    }
+                }
+            }
+
+            repository(url: "$IS_RELEASE") {
+                authentication(userName: "admin", password: "admin123")
+            }
+        }
+    }
+}
+
+//为项目生成**.jar/**-javadoc.jar/**-sources.jar
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'README.md'
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}

@@ -1,0 +1,16 @@
+
+
+when windows execute command:
+	thrift-0.10.0.exe -gen java ITransfer.thrift
+
+when linux:
+	download thrift-0.10.0.tar.gz
+	tar -xzvf thrift-0.10.0.tar.gz
+	cd thrift-0.10.0.tar.gz
+	./configuration
+	make
+	make install
+	thrift -version (successful if return right version)
+	thrift -gen java ITransfer.thrift
+
+
