@@ -1,6 +1,7 @@
 package com.upsmart.server.trans.server;
 
 import com.upsmart.server.trans.server.contract.Contract;
+import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.server.TThreadPoolServer.Args;
@@ -46,10 +47,10 @@ public class ThriftService implements ServerService
 
 		Args tThreadPoolServerArgs = new TThreadPoolServer.Args(serverTransport);
 		tThreadPoolServerArgs.processor(new ITransfer.Processor(contract));
-		tThreadPoolServerArgs.maxWorkerThreads(thriftServConnectionArgs.getMaxWorkerThread());
-		server = new TThreadPoolServer(tThreadPoolServerArgs);
+		tThreadPoolServerArgs.maxWorkerThreads(thriftServConnectionArgs.getMaxWorkerThread()); // 最大处理线程
+		tThreadPoolServerArgs.protocolFactory(new TBinaryProtocol.Factory()); // 数据传输协议:二进制
 
-		// 启动服务
+		server = new TThreadPoolServer(tThreadPoolServerArgs);
 		server.serve();
 	}
 

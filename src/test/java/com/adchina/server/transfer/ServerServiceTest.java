@@ -16,7 +16,7 @@ public class ServerServiceTest
 			s = new ThriftService();
 			
 			Contract c = new MyContract();
-			ServConnectionArgs args = new ThriftServConnectionArgs(8088, 16, c);
+			ServConnectionArgs args = new ThriftServConnectionArgs(8088,  c, 16);
 			
 			System.out.println("service will be started...");
 			s.start(args);
